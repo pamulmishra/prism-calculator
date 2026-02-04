@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prism Calculator</title>
     <style>
         * {
@@ -15,29 +15,34 @@
         body {
             font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            height: 100vh;
+            /* Prevents scrolling on mobile if content fits */
+            overflow: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .calculator {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 35px;
-            padding: 35px;
+            border-radius: 30px;
+            /* Padding scales with screen height: min 20px, max 35px */
+            padding: clamp(20px, 3vh, 35px);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            max-width: 480px;
+            max-width: 450px;
             width: 100%;
+            /* Ensures it never gets taller than the screen */
+            max-height: 98vh; 
+            display: flex;
+            flex-direction: column;
             position: relative;
-            overflow: hidden;
-            animation: slideIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            animation: slideIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* Subtle shine effect */
         .calculator::before {
             content: '';
             position: absolute;
@@ -60,13 +65,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: clamp(10px, 2vh, 20px);
             padding: 0 5px;
+            flex-shrink: 0;
         }
 
         .brand-name {
             color: white;
-            font-size: 24px;
+            font-size: clamp(20px, 3vh, 24px);
             font-weight: 700;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -79,7 +85,7 @@
             display: flex;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 20px;
-            padding: 4px;
+            padding: 3px;
             gap: 2px;
         }
 
@@ -87,7 +93,7 @@
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.6);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -101,28 +107,27 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .mode-btn:hover:not(.active) {
-            color: white;
-        }
-
-        /* Display Area */
+        /* Display Area - Responsive Height */
         .display {
             background: rgba(0, 0, 0, 0.25);
-            border-radius: 25px;
-            padding: 25px;
-            margin-bottom: 25px;
+            border-radius: 20px;
+            /* Scales padding and height based on screen space */
+            padding: clamp(15px, 2.5vh, 25px);
+            margin-bottom: clamp(15px, 2.5vh, 25px);
             text-align: right;
-            min-height: 110px;
+            /* Height matches screen: min 80px, max 120px */
+            min-height: clamp(80px, 15vh, 120px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .previous-operand {
             color: rgba(255, 255, 255, 0.6);
-            font-size: 16px;
+            font-size: clamp(14px, 2vh, 16px);
             min-height: 24px;
             margin-bottom: 5px;
             font-weight: 400;
@@ -130,23 +135,25 @@
 
         .current-operand {
             color: white;
-            font-size: 42px;
+            /* Font size scales smoothly */
+            font-size: clamp(32px, 5vh, 46px);
             font-weight: 300;
             line-height: 1.1;
             word-wrap: break-word;
             word-break: break-all;
         }
 
-        /* GST Slab Controls */
+        /* GST Controls - Responsive */
         .gst-controls {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 18px;
-            padding: 12px;
-            margin-bottom: 20px;
+            padding: clamp(8px, 1.5vh, 12px);
+            margin-bottom: clamp(10px, 2vh, 20px);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .gst-label {
@@ -166,32 +173,29 @@
 
         .slab-btn {
             flex: 1;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.05);
             color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
-        }
-
-        .slab-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
         }
 
         .slab-btn.active {
             background: #84fab0;
             color: #1a472a;
             border-color: #84fab0;
-            box-shadow: 0 4px 15px rgba(132, 250, 176, 0.3);
         }
 
         /* Buttons Grid */
         .buttons {
             display: grid;
-            gap: 12px;
+            /* Gap scales with screen height */
+            gap: clamp(8px, 1.5vh, 12px);
+            flex-grow: 1; /* Fills remaining space */
         }
 
         .buttons.simple, .buttons.gst { grid-template-columns: repeat(4, 1fr); }
@@ -199,31 +203,28 @@
 
         button {
             border: none;
-            border-radius: 18px;
-            font-size: 20px;
+            border-radius: clamp(12px, 2vh, 18px);
+            font-size: clamp(16px, 2.5vh, 22px);
             font-weight: 500;
-            height: 65px;
+            /* MAGIC FIX: Button height auto-scales. 
+               Min: 45px (for touch), Max: 65px (for desktop beauty) */
+            height: clamp(45px, 8vh, 65px);
             cursor: pointer;
-            transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
+            transition: transform 0.1s, background 0.2s;
             position: relative;
             overflow: hidden;
             outline: none;
         }
 
-        button:active {
-            transform: scale(0.92);
-        }
+        button:active { transform: scale(0.92); }
 
-        /* Button Styles */
+        /* Button Colors */
         .btn-number, .btn-decimal {
             background: rgba(255, 255, 255, 0.15);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .btn-number:hover, .btn-decimal:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        .btn-number:hover { background: rgba(255, 255, 255, 0.25); }
 
         .btn-operator {
             background: rgba(255, 154, 158, 0.2);
@@ -231,62 +232,35 @@
             border: 1px solid rgba(255, 154, 158, 0.3);
             font-weight: 600;
         }
-        
-        .btn-operator:hover {
-            background: rgba(255, 154, 158, 0.4);
-            color: white;
-            box-shadow: 0 0 15px rgba(255, 154, 158, 0.2);
-        }
+        .btn-operator:hover { background: rgba(255, 154, 158, 0.4); color: white; }
 
-        .btn-action { /* For Clear/Delete */
+        .btn-action {
             background: rgba(255, 236, 210, 0.2);
             color: #ffe0b2;
             border: 1px solid rgba(255, 236, 210, 0.3);
-            font-size: 18px;
         }
-        
-        .btn-action:hover {
-            background: rgba(255, 236, 210, 0.4);
-            color: white;
-        }
+        .btn-action:hover { background: rgba(255, 236, 210, 0.4); color: white; }
 
         .btn-equals {
             background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
             color: #0d4642;
             font-weight: 700;
-            font-size: 28px;
-            box-shadow: 0 8px 20px rgba(132, 250, 176, 0.3);
-        }
-        
-        .btn-equals:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(132, 250, 176, 0.4);
+            font-size: clamp(22px, 3vh, 28px);
         }
 
         .btn-gst-action {
             background: rgba(132, 250, 176, 0.2);
             color: #b9fbc0;
             border: 1px solid rgba(132, 250, 176, 0.3);
-            font-size: 16px;
             font-weight: 700;
+            font-size: clamp(14px, 2vh, 16px);
         }
         
-        .btn-gst-action:hover {
-            background: rgba(132, 250, 176, 0.4);
-            color: white;
-            box-shadow: 0 0 15px rgba(132, 250, 176, 0.2);
-        }
-
         .btn-scientific {
             background: rgba(0, 0, 0, 0.2);
             color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
+            font-size: clamp(12px, 1.8vh, 14px);
             font-weight: 600;
-        }
-
-        .btn-scientific:hover {
-            background: rgba(0, 0, 0, 0.4);
-            color: white;
         }
 
         .span-two { grid-column: span 2; }
@@ -307,14 +281,13 @@
             z-index: 10;
         }
 
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            .calculator { padding: 25px; border-radius: 25px; }
-            button { height: 55px; font-size: 18px; border-radius: 14px; }
-            .current-operand { font-size: 36px; }
-            .brand-name { font-size: 20px; }
-            .mode-btn { padding: 8px 12px; font-size: 12px; }
-            .btn-scientific { font-size: 12px; }
+        /* Extreme Small Height Screens (Horizontal Phone / Small Laptop) */
+        @media (max-height: 600px) {
+            .calculator { padding: 15px; }
+            .header { margin-bottom: 5px; }
+            .display { min-height: 60px; padding: 10px; margin-bottom: 10px; }
+            .current-operand { font-size: 28px; }
+            button { height: auto; aspect-ratio: 2/1; } 
         }
     </style>
 </head>
@@ -442,7 +415,7 @@
                 this.currentOperandElement = currentOperandElement;
                 this.currentMode = 'simple';
                 this.angleMode = 'rad';
-                this.gstRate = 18; // Default GST rate
+                this.gstRate = 18;
                 this.clear();
             }
 
@@ -479,45 +452,33 @@
             }
 
             appendFunction(func) {
-                if (this.currentOperand === '0') {
-                    this.currentOperand = func;
-                } else {
-                    this.currentOperand = this.currentOperand.toString() + func;
-                }
+                if (this.currentOperand === '0') this.currentOperand = func;
+                else this.currentOperand = this.currentOperand.toString() + func;
                 this.updateDisplay();
             }
 
             appendConstant(constant) {
                 let value = (constant === 'π') ? Math.PI.toString() : Math.E.toString();
-                if (this.currentOperand === '0') {
-                    this.currentOperand = value;
-                } else {
-                    this.currentOperand = this.currentOperand.toString() + '*' + value;
-                }
+                if (this.currentOperand === '0') this.currentOperand = value;
+                else this.currentOperand = this.currentOperand.toString() + '*' + value;
                 this.updateDisplay();
             }
 
-            // Updated GST Function using selected slab
             addGST() {
                 const amount = parseFloat(this.currentOperand);
                 if (isNaN(amount)) return;
-                
                 const gstAmount = amount * (this.gstRate / 100);
                 const total = amount + gstAmount;
-                
                 this.previousOperand = `${amount} + ${this.gstRate}% GST (₹${gstAmount.toFixed(2)})`;
                 this.currentOperand = Math.round((total + Number.EPSILON) * 100) / 100;
                 this.updateDisplay();
             }
 
-            // Updated Remove GST Function using selected slab
             removeGST() {
                 const inclusiveAmount = parseFloat(this.currentOperand);
                 if (isNaN(inclusiveAmount)) return;
-                
                 const baseAmount = inclusiveAmount / (1 + (this.gstRate / 100));
                 const gstAmount = inclusiveAmount - baseAmount;
-                
                 this.previousOperand = `${inclusiveAmount} - ${this.gstRate}% GST (₹${gstAmount.toFixed(2)})`;
                 this.currentOperand = Math.round((baseAmount + Number.EPSILON) * 100) / 100;
                 this.updateDisplay();
@@ -563,7 +524,6 @@
             evaluateScientificExpression(expression) {
                 let expr = expression.toString();
                 expr = expr.replace(/π/g, Math.PI).replace(/e(?![0-9])/g, Math.E);
-                
                 const trigMultiplier = this.angleMode === 'deg' ? '*(Math.PI/180)' : '';
                 
                 if (this.angleMode === 'deg') {
@@ -573,11 +533,8 @@
                 } else {
                     expr = expr.replace(/sin\(/g, 'Math.sin(').replace(/cos\(/g, 'Math.cos(').replace(/tan\(/g, 'Math.tan(');
                 }
-
                 expr = expr.replace(/log\(/g, 'Math.log10(').replace(/ln\(/g, 'Math.log(')
                            .replace(/sqrt\(/g, 'Math.sqrt(').replace(/pow\(/g, 'Math.pow(');
-                
-                // Implicit multiplication handling
                 expr = expr.replace(/(\d)Math/g, '$1*Math').replace(/\)Math/g, ')*Math');
 
                 return Function(`"use strict"; return (${expr})`)();
@@ -591,11 +548,9 @@
             getDisplayNumber(number) {
                 const stringNumber = number.toString();
                 if (stringNumber.length > 11) return parseFloat(number).toExponential(5);
-                
                 const parts = stringNumber.split('.');
                 const integerPart = parseFloat(parts[0]);
                 const decimalPart = parts[1];
-                
                 let display = isNaN(integerPart) ? '' : integerPart.toLocaleString('en', { maximumFractionDigits: 0 });
                 return (decimalPart != null) ? `${display}.${decimalPart}` : display;
             }
@@ -612,11 +567,9 @@
             document.getElementById('currentOperand')
         );
 
-        // UI Helpers
         function switchMode(mode) {
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
             ['simpleButtons', 'gstButtons', 'scientificButtons', 'gstControls', 'angleToggle'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
@@ -629,7 +582,6 @@
                 document.getElementById('scientificButtons').classList.remove('hidden');
                 document.getElementById('angleToggle').classList.remove('hidden');
             }
-            
             calculator.currentMode = mode;
             calculator.clear();
         }
@@ -637,15 +589,12 @@
         function setGstRate(rate) {
             calculator.setGstRate(rate);
             document.querySelectorAll('.slab-btn').forEach(btn => btn.classList.remove('active'));
-            // Find the button that was clicked or corresponds to the rate
-            const btnId = `btn-${rate}`;
-            const btn = document.getElementById(btnId);
+            const btn = document.getElementById(`btn-${rate}`);
             if(btn) btn.classList.add('active');
         }
 
         function toggleAngleMode() { calculator.toggleAngleMode(); }
 
-        // Keyboard Support
         document.addEventListener('keydown', e => {
             const key = e.key;
             if (/\d|\./.test(key)) calculator.appendNumber(key);
@@ -656,7 +605,6 @@
             else if (key.toLowerCase() === 'c') calculator.clear();
         });
 
-        // Touch Interaction
         document.querySelectorAll('button').forEach(btn => {
             btn.addEventListener('touchstart', function() { this.style.transform = 'scale(0.92)'; });
             btn.addEventListener('touchend', function() { this.style.transform = ''; });
